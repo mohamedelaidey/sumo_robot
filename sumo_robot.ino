@@ -75,7 +75,7 @@ void moveleft(int speed){
 void search(){
   analogWrite(ena, 120);
   analogWrite(enb, 120);
-  if (millis() % 2000 < 1000)
+  if (millis() % 4000 < 2000) //كدا بدل ما بسيرش في اتجاه واحد بقوله ف اول ثانيتين بص يمين وبعدها ب ثانيتين لو ملقيتوش دور شمال وهكذا
    moveright(120);
   else
    moveleft(120);
