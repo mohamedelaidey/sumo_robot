@@ -55,31 +55,32 @@ void attack(){
   digitalWrite(in24_2,LOW);
 } 
 
-void moveright(int speed){
-  analogWrite(ena,speed);
-  analogWrite(enb, speed);
+void moveright(){
+  analogWrite(ena,200);
+  analogWrite(enb, 100);
   digitalWrite(in13_1,HIGH);
   digitalWrite(in24_1,LOW);
-  digitalWrite(in13_2,LOW);
-  digitalWrite(in24_2,HIGH);
+  digitalWrite(in13_2,HIGH);
+  digitalWrite(in24_2,LOW);
 
 }
-void moveleft(int speed){
-  analogWrite(ena, speed);
-  analogWrite(enb, speed);
-  digitalWrite(in13_1,LOW);
-  digitalWrite(in24_1,HIGH);
+void moveleft(){
+  analogWrite(ena,100);
+  analogWrite(enb, 200);
+  digitalWrite(in13_1,HIGH);
+  digitalWrite(in24_1,LOW);
   digitalWrite(in13_2,HIGH);
   digitalWrite(in24_2,LOW);
 }
 void search(){
   analogWrite(ena, 120);
   analogWrite(enb, 120);
-  if (millis() % 4000 < 2000) //كدا بدل ما بسيرش في اتجاه واحد بقوله ف اول ثانيتين بص يمين وبعدها ب ثانيتين لو ملقيتوش دور شمال وهكذا
-   moveright(120);
-  else
-   moveleft(120);
-}
+  digitalWrite(in13_1,HIGH);
+  digitalWrite(in24_1,LOW);
+  digitalWrite(in13_2,LOW);
+  digitalWrite(in24_2,HIGH);
+} 
+
 
 
 
@@ -123,13 +124,13 @@ void loop() {
   if(irR==1 ){
     if(digitalRead(ir_right)==1){  //عملتها مرتين عشان اتاكد انه قاري حاجه فعلا وابقي متجنب النويز
     speed_attack=0;
-    moveleft(255);
+    moveleft();
   }}
 
   else if(irL==1){
     if(digitalRead(ir_left)==1){
     speed_attack=0;
-    moveright(255);
+    moveright();
   }}
   else if(irB==1){
     moveforward(255);
@@ -157,6 +158,7 @@ void loop() {
   
   }
    
+
 
 
 
