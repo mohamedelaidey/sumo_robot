@@ -1,27 +1,29 @@
 #include <NewPing.h>
 
-
-
 #define max_distance 100
 
-NewPing sonic_right(4, 5,max_distance);
-NewPing sonic_left(2,3, max_distance);
+NewPing sonic_right(2,3,max_distance);
+NewPing sonic_left(4,5, max_distance);
 
 
 int dist_left = 0;
 int dist_right = 0;
 
-int ir_right1=6;
-int ir_right2=7;
-int ir_left1=8;
-int ir_left2=9;
+int ir_right=A0;
+int ir_left=A1;
+int ir_back=A2;
 
 int ena=10;
 int enb=11;
-int in1=12;
-int in2=13;
-int in3=14;
-int in4=15;
+
+int in13_1=6;
+int in24_1=7; //دول الماتورين الشمال
+
+int in13_2=8;
+int in24_2=9; //دول الماتورين اليمين
+
+//كده معانا بينات فاضيه 12,13//
+
 
 
 unsigned long last_time = 0;  //ده متغير عامله عشان يقري الالترا سونيك كل .05 ثانيه في الif//
@@ -31,13 +33,14 @@ int speed_attack = 0;
 
 
 
-void moveforward(){
-  analogWrite(ena,180);
-  analogWrite(enb,180);
-  digitalWrite(in1,1);
-  digitalWrite(in2,0);
-  digitalWrite(in3,1);
-  digitalWrite(in4,0);
+
+void moveforward(int speed){
+  analogWrite(ena,speed);
+  analogWrite(enb,speed);
+  digitalWrite(in13_1,HIGH);
+  digitalWrite(in24_1,LOW);
+  digitalWrite(in13_2,HIGH);
+  digitalWrite(in24_2,LOW);
 }
 void attack(){
   if(speed_attack < 255)
@@ -46,52 +49,56 @@ void attack(){
   analogWrite(ena, speed_attack);
   analogWrite(enb, speed_attack);
 
-  digitalWrite(in1, 1);
-  digitalWrite(in2, 0);
-  digitalWrite(in3, 1);
-  digitalWrite(in4, 0);
+  digitalWrite(in13_1,HIGH);
+  digitalWrite(in24_1,LOW);
+  digitalWrite(in13_2,HIGH);
+  digitalWrite(in24_2,LOW);
 } 
 
-void moveright(){
-  analogWrite(ena, 180);
-  analogWrite(enb, 180);
-  digitalWrite(in1, 0);
-  digitalWrite(in2, 1);
-  digitalWrite(in3, 0);
-  digitalWrite(in4, 1);
+void moveright(int speed){
+  analogWrite(ena,speed);
+  analogWrite(enb, speed);
+  digitalWrite(in13_1,HIGH);
+  digitalWrite(in24_1,LOW);
+  digitalWrite(in13_2,LOW);
+  digitalWrite(in24_2,HIGH);
 
 }
-void moveleft(){
-  analogWrite(ena, 180);
-  analogWrite(enb, 180);
-  digitalWrite(in1, 1);
-  digitalWrite(in2, 0);
-  digitalWrite(in3, 0);
-  digitalWrite(in4, 1);
+void moveleft(int speed){
+  analogWrite(ena, speed);
+  analogWrite(enb, speed);
+  digitalWrite(in13_1,LOW);
+  digitalWrite(in24_1,HIGH);
+  digitalWrite(in13_2,HIGH);
+  digitalWrite(in24_2,LOW);
 }
 void search(){
   analogWrite(ena, 120);
   analogWrite(enb, 120);
-  digitalWrite(in1, 1);
-  digitalWrite(in2, 0);
-  digitalWrite(in3, 0);
-  digitalWrite(in4, 1);
+  if (millis() % 2000 < 1000)
+   moveright(120);
+  else
+   moveleft(120);
 }
 
 
 
 void setup() {
   Serial.begin(9600);
-  pinMode(ir_right1,INPUT);
-  pinMode(ir_right2,INPUT);
-  pinMode(ir_left1,INPUT);
-  pinMode(ir_left2,INPUT);
+  pinMode(ir_right,INPUT);
+  pinMode(ir_left,INPUT);
+  pinMode(ir_back,INPUT);
+  
 
-  pinMode(in1,OUTPUT);
-  pinMode(in2,OUTPUT);
-  pinMode(in3,OUTPUT);
-  pinMode(in4,OUTPUT);
- 
+  pinMode(in13_1,OUTPUT);
+  pinMode(in24_1,OUTPUT);
+  pinMode(in13_2,OUTPUT);
+  pinMode(in24_2,OUTPUT);
+  pinMode(ena,OUTPUT);
+  pinMode(enb,OUTPUT);
+  pinMode(A0,INPUT);
+  pinMode(A1,INPUT);
+  pinMode(A2,INPUT);
   }
 
 
@@ -109,24 +116,28 @@ void loop() {
     }
   }
 
-  int irR=digitalRead(ir_right1)|| digitalRead(ir_right2) ;
-  int irL=digitalRead(ir_left1) || digitalRead(ir_left2);
+  int irR=digitalRead(ir_right);
+  int irL=digitalRead(ir_left);
+  int irB=digitalRead(ir_back);
 
   if(irR==1 ){
-    delayMicroseconds(1000);
-    if(digitalRead(ir_right1)==1 || digitalRead(ir_right2)==1){  //عملتها مرتين عشان اتاكد انه قاري حاجه فعلا وابقي متجنب النويز
+    if(digitalRead(ir_right)==1){  //عملتها مرتين عشان اتاكد انه قاري حاجه فعلا وابقي متجنب النويز
     speed_attack=0;
-    moveright();
+    moveleft(255);
   }}
 
   else if(irL==1){
-    delayMicroseconds(1000);
-    if(digitalRead(ir_left1)==1 || digitalRead(ir_left2)==1 ){
+    if(digitalRead(ir_left)==1){
     speed_attack=0;
-    moveleft();
+    moveright(255);
   }}
+  else if(irB==1){
+    moveforward(255);
 
-  else if ((dist_left >=0 && dist_left < 30) || (dist_right >=0 && dist_right < 30)) {
+  }
+
+
+  else if ((dist_left >0 && dist_left < 30) || (dist_right >0 && dist_right < 30)) {
      lastseen=millis();
      attack();
   }
@@ -137,7 +148,7 @@ void loop() {
 
   else if ((dist_left >=30 && dist_left < 60) || (dist_right >=30 && dist_right < 60)) {
      speed_attack=0;
-     moveforward();
+     moveforward(150);
   }
   else  {
     speed_attack=0;
@@ -145,6 +156,14 @@ void loop() {
   }
   
   }
+   
+
+
+
+
+
+
+
    
 
 
